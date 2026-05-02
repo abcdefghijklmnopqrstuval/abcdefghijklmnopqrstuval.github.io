@@ -22,62 +22,24 @@ function switchTab(id, btn) {
   });
 }
 
-/* ── Birthday Countdown ── */
-const BIRTH_MONTH = 10; // October
-const BIRTH_DAY   = 17;
-const BIRTH_YEAR  = 2009; // ← Set your actual birth year
+/* ── Live Age Counter ── */
+(function() {
+  var birthday = new Date(2009, 9, 17).getTime(); // October 17, 2009
+  var wholeEl   = document.getElementById('age-whole');
+  var decimalEl = document.getElementById('age-decimal');
+  if (!wholeEl || !decimalEl) return;
 
-function getBirthdayInfo() {
-  const now     = new Date();
-  const thisYear = now.getFullYear();
-
-  // Next birthday this year or next
-  let next = new Date(thisYear, BIRTH_MONTH - 1, BIRTH_DAY);
-  if (now >= next) next = new Date(thisYear + 1, BIRTH_MONTH - 1, BIRTH_DAY);
-
-  const diff   = next - now;
-  const isBday = diff < 1000; // within 1 second = it's today
-
-  const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const secs  = Math.floor((diff % (1000 * 60)) / 1000);
-  const ms    = diff % 1000;
-
-  // Current age (how old you are right now)
-  let age = thisYear - BIRTH_YEAR;
-  const hasBirthdayPassedThisYear = now >= new Date(thisYear, BIRTH_MONTH - 1, BIRTH_DAY);
-  if (!hasBirthdayPassedThisYear) age--;
-
-  return { days, hours, mins, secs, ms, age, isBday };
-}
-
-function updateCountdown() {
-  const timerEl   = document.getElementById('bday-timer');
-  const wrapEl    = document.getElementById('bday-countdown');
-  if (!timerEl) return;
-
-  const { days, hours, mins, secs, ms, age, isBday } = getBirthdayInfo();
-
-  if (isBday) {
-    timerEl.textContent = '🎉 Today!';
-  } else {
-    const pad = (n, len = 2) => String(n).padStart(len, '0');
-    timerEl.textContent = `${pad(days)}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s ${pad(ms, 3)}ms`;
+  function updateAge() {
+    var now = Date.now();
+    var age = (now - birthday) / (365.2425 * 24 * 60 * 60 * 1000);
+    var whole = Math.floor(age);
+    var frac  = (age - whole).toFixed(9).substring(1); // ".123456789"
+    wholeEl.textContent   = whole;
+    decimalEl.textContent = frac;
   }
-
-  // Update tooltip content
-  let tooltip = wrapEl.querySelector('.bday-tooltip');
-  if (!tooltip) {
-    tooltip = document.createElement('div');
-    tooltip.className = 'bday-tooltip';
-    wrapEl.appendChild(tooltip);
-  }
-  tooltip.textContent = `Age: ${age}  ·  Birthday: October ${BIRTH_DAY}`;
-}
-
-updateCountdown();
-setInterval(updateCountdown, 50); // 50ms for smooth milliseconds
+  updateAge();
+  setInterval(updateAge, 50);
+})();
 
 /* ── Last.fm Now Playing ── */
 const LASTFM_USER    = 'vacrtino'; // ← Replace with your Last.fm username
@@ -125,3 +87,20 @@ async function fetchNowPlaying() {
 
 fetchNowPlaying();
 setInterval(fetchNowPlaying, 10000);
+/* ── Dog Modal ── */
+function openDogModal(e) {
+  const overlay = document.getElementById('dog-modal-overlay');
+  overlay.classList.add('open');
+  // Trap focus / close on Escape
+  document.addEventListener('keydown', onEscDog);
+}
+
+function closeDogModal() {
+  const overlay = document.getElementById('dog-modal-overlay');
+  overlay.classList.remove('open');
+  document.removeEventListener('keydown', onEscDog);
+}
+
+function onEscDog(e) {
+  if (e.key === 'Escape') closeDogModal();
+}
